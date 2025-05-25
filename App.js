@@ -3,7 +3,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
-
+import UrunDetay from './screens/UrunDetay';
 // Sayfa bileşenleri
 import HomeScreen from './screens/HomeScreen';
 import CompareScreen from './screens/CompareScreen';
@@ -51,6 +51,7 @@ export default function App() {
           component={MainTabs}
           options={{ headerShown: false }}
         />
+        <Stack.Screen name="UrunDetay" component={UrunDetay} options={{ title: 'Ürün Detayı' }} />
 
         {/* Market ürün detay ekranı */}
         <Stack.Screen
