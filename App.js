@@ -10,7 +10,7 @@ import CompareScreen from './screens/CompareScreen';
 import FavoritesScreen from './screens/FavoritesScreen';
 import ProfileScreen from './screens/ProfileScreen';
 import MarketProducts from './screens/MarketProducts'; // ✅ Detay ekran
-
+import LoginScreen from './screens/LoginScreen';
 // Navigatorlar
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -51,7 +51,10 @@ export default function App() {
           component={MainTabs}
           options={{ headerShown: false }}
         />
-        <Stack.Screen name="UrunDetay" component={UrunDetay} options={{ title: 'Ürün Detayı' }} />
+
+        {/* Login ve Profil */}
+        <Stack.Screen name="LoginScreen" component={LoginScreen} />
+        <Stack.Screen name="ProfileScreen" component={ProfileScreen} />
 
         {/* Market ürün detay ekranı */}
         <Stack.Screen
@@ -59,7 +62,14 @@ export default function App() {
           component={MarketProducts}
           options={{ title: 'Market Ürünleri' }}
         />
+        <Stack.Screen
+          name="UrunDetay"
+          component={UrunDetay}
+          options={{ title: 'Ürün Detayı' }}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );
 }
+
+

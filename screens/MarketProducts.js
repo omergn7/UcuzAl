@@ -28,7 +28,7 @@ export default function MarketProducts({ route }) {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get(`http://10.0.17.81:8080/api/market-urun/ozet/${marketId}`, {
+        const response = await axios.get(`http://10.0.17.32:8080/api/market-urun/ozet/${marketId}`, {
           timeout: 10000
         });
 

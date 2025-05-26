@@ -27,7 +27,7 @@ export default function UrunDetay({ route }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    axios.get(`http://10.0.17.81:8080/api/urunler/detay/${barkodId}`, { timeout: 10000 })
+    axios.get(`http://10.0.17.32:8080/api/urunler/detay/${barkodId}`, { timeout: 10000 })
       .then(response => setUrun(response.data))
       .catch(err => console.error('Detay hatası:', err))
       .finally(() => setLoading(false));

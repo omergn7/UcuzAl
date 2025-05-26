@@ -11,30 +11,29 @@ import {
 } from 'react-native';
 import { CameraView, Camera } from 'expo-camera';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { useNavigation } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function ProfileScreen() {
+  const navigation = useNavigation();
+
   const [hasPermission, setHasPermission] = useState(null);
   const [scanned, setScanned] = useState(false);
   const [scanning, setScanning] = useState(false);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
+  const [userInfo, setUserInfo] = useState(null);
 
   useEffect(() => {
     (async () => {
       const { status } = await Camera.requestCameraPermissionsAsync();
       setHasPermission(status === 'granted');
+
+      const storedUser = await AsyncStorage.getItem('kullanici');
+      if (storedUser) {
+        setUserInfo(JSON.parse(storedUser));
+      }
     })();
   }, []);
-
-  const userInfo = {
-    name: 'Ahmet Yılmaz',
-    email: 'ahmet@example.com',
-    totalSavings: '1.250 TL',
-    favoriteProducts: [
-      { id: '1', name: 'Süt', savings: '15 TL' },
-      { id: '2', name: 'Ekmek', savings: '5 TL' },
-      { id: '3', name: 'Yumurta', savings: '20 TL' },
-    ],
-  };
 
   const handleBarCodeScanned = ({ type, data }) => {
     if (!scanned) {
@@ -42,6 +41,12 @@ export default function ProfileScreen() {
       setScanning(false);
       Alert.alert('Barkod Okundu', `Tip: ${type}\nKod: ${data}`);
     }
+  };
+
+  const handleLogout = async () => {
+    await AsyncStorage.removeItem('kullanici');
+    Alert.alert("Çıkış Yapıldı");
+    navigation.replace('LoginScreen');
   };
 
   if (hasPermission === null) {
@@ -56,6 +61,20 @@ export default function ProfileScreen() {
     return (
       <View style={styles.centered}>
         <Text style={{ color: 'red' }}>Kamera izni reddedildi</Text>
+      </View>
+    );
+  }
+
+  if (!userInfo) {
+    return (
+      <View style={styles.centered}>
+        <Text>Giriş yapmadınız.</Text>
+        <TouchableOpacity
+          style={styles.scanButton}
+          onPress={() => navigation.navigate('LoginScreen')}
+        >
+          <Text style={{ color: 'white' }}>Giriş Yap</Text>
+        </TouchableOpacity>
       </View>
     );
   }
@@ -85,20 +104,25 @@ export default function ProfileScreen() {
               style={styles.avatar}
               source={{ uri: 'https://via.placeholder.com/150' }}
             />
-            <Text style={styles.name}>{userInfo.name}</Text>
+            <Text style={styles.name}>{userInfo.isim} {userInfo.soyisim}</Text>
             <Text style={styles.email}>{userInfo.email}</Text>
           </View>
 
           <View style={styles.statsContainer}>
             <View style={styles.statBox}>
-              <Text style={styles.statAmount}>{userInfo.totalSavings}</Text>
+              <Text style={styles.statAmount}>{userInfo.toplamTasarruf} TL</Text>
               <Text style={styles.statLabel}>Toplam Tasarruf</Text>
+            </View>
+            <View style={styles.statBox}>
+              <Text style={styles.statAmount}>{userInfo.aylikTasarruf} TL</Text>
+              <Text style={styles.statLabel}>Aylık Tasarruf</Text>
             </View>
           </View>
 
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Favori Ürünlerim</Text>
-            {userInfo.favoriteProducts.map((product) => (
+            {/* Örnek sabit ürünler */}
+            {[{ id: 1, name: 'Süt', savings: '15 TL' }, { id: 2, name: 'Ekmek', savings: '5 TL' }].map(product => (
               <View key={product.id} style={styles.favoriteItem}>
                 <Ionicons name="star" size={24} color="#f1c40f" />
                 <Text style={styles.productName}>{product.name}</Text>
@@ -149,7 +173,7 @@ export default function ProfileScreen() {
               <Text style={styles.modalButtonText}>Destek</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.modalButton} onPress={() => alert('Çıkış yapılıyor...')}>
+            <TouchableOpacity style={styles.modalButton} onPress={handleLogout}>
               <Ionicons name="log-out-outline" size={20} color="red" />
               <Text style={[styles.modalButtonText, { color: 'red' }]}>Çıkış Yap</Text>
             </TouchableOpacity>
@@ -171,18 +195,14 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f5f6fa' },
   centered: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  header: {
-    alignItems: 'center',
-    padding: 20,
-    backgroundColor: 'white',
-  },
+  header: { alignItems: 'center', padding: 20, backgroundColor: 'white' },
   avatar: { width: 100, height: 100, borderRadius: 50, marginBottom: 10 },
   name: { fontSize: 24, fontWeight: 'bold', color: '#2d3436' },
   email: { fontSize: 16, color: '#636e72' },
   statsContainer: {
     flexDirection: 'row',
     padding: 20,
-    justifyContent: 'center',
+    justifyContent: 'space-around',
   },
   statBox: {
     backgroundColor: '#000000',
