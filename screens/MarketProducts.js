@@ -29,7 +29,7 @@ export default function MarketProducts({ route }) {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get(`http://10.0.18.202:8080/api/market-urun/ozet/${marketId}`, {
+        const response = await axios.get(`http://172.20.10.2:8080/api/market-urun/ozet/${marketId}`, {
           timeout: 10000
         });
 
@@ -65,7 +65,8 @@ export default function MarketProducts({ route }) {
   const renderItem = ({ item }) => {
     const ulke = item.ulkeAdi?.toUpperCase();
     const bayrak = flagMap[ulke] || '🌍';
-  
+    
+
     return (
       <TouchableOpacity
         style={styles.card}

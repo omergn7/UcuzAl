@@ -48,7 +48,7 @@ export default function RegisterScreen({ navigation }) {
     }
   
     try {
-      await axios.post('http://10.0.18.202:8080/api/kullanici/kayit', {
+      await axios.post('http://172.20.10.2:8080/api/kullanici/kayit', {
         isim,
         soyisim,
         email,

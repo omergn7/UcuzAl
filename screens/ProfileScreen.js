@@ -49,9 +49,9 @@ export default function ProfileScreen() {
       
         try {
           const [kullaniciRes, aylikRes, chartRes] = await Promise.all([
-            fetch(`http://10.0.18.202:8080/api/kullanici/${parsed.kullanici_id}`),
-            fetch(`http://10.0.18.202:8080/api/kullanici/${parsed.kullanici_id}/aylik-tasarruf`),
-            fetch(`http://10.0.18.202:8080/api/kullanici/${parsed.kullanici_id}/grafik-verisi`)
+            fetch(`http://172.20.10.2:8080/api/kullanici/${parsed.kullanici_id}`),
+            fetch(`http://172.20.10.2:8080/api/kullanici/${parsed.kullanici_id}/aylik-tasarruf`),
+            fetch(`http://172.20.10.2:8080/api/kullanici/${parsed.kullanici_id}/grafik-verisi`)
           ]);
       
           const kullaniciJson = await kullaniciRes.json();

@@ -35,15 +35,6 @@ export default function CompareScreen() {
     })();
   }, []);
 
-  const getMarketLogo = (marketAdi) => {
-    const lower = marketAdi.toLowerCase();
-    if (lower.includes("migros")) {
-      return "https://sdgmapturkey.com/wp-content/uploads/migros-logo.png";
-    } else if (lower.includes("şok") || lower.includes("sok")) {
-      return "https://yt3.googleusercontent.com/NgTIYRRcD-9-bUsRBVsx6SXykTtWj8A9drDFsj9Vvh2n8MG8F_2M_Ghj8pgOCKXitXzXMDEbFx8=s900-c-k-c0x00ffffff-no-rj";
-    }
-    return null;
-  };
 
   const handleBarCodeScanned = async ({ type, data }) => {
     if (scannedOnceRef.current) return;
@@ -60,7 +51,7 @@ export default function CompareScreen() {
 
     const barkod = match[0];
     try {
-      const response = await fetch(`http://10.0.18.202:8080/api/urunler/karsilastir?barkod=${barkod}`);
+      const response = await fetch(`http://172.20.10.2:8080/api/urunler/karsilastir?barkod=${barkod}`);
       const json = await response.json();
 
       if (json?.urunAdi) {
@@ -120,7 +111,7 @@ export default function CompareScreen() {
 
       await AsyncStorage.setItem("kullanici", JSON.stringify(parsed));
 
-      await fetch('http://10.0.18.202:8080/api/kullanici/tasarruf-ekle', {
+      await fetch('http://172.20.10.2:8080/api/kullanici/tasarruf-ekle', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -180,7 +171,7 @@ export default function CompareScreen() {
       const userData = await AsyncStorage.getItem('kullanici');
       if (userData) {
         const user = JSON.parse(userData);
-        const response = await axios.post('http://10.0.18.202:8080/api/tasarruf/ekle', {
+        const response = await axios.post('http://172.20.10.2:8080/api/tasarruf/ekle', {
           kullaniciId: user.id,
           urunId: selectedProduct.id,
           tasarrufMiktari: selectedProduct.tasarruf
@@ -230,7 +221,8 @@ export default function CompareScreen() {
         cardStyle = [styles.marketCard, styles.pahaliCard];
       }
 
-      const logo = getMarketLogo(k.market);
+      const logo = k.marketGorsel;
+
 
       return (
         <Animated.View key={index} style={cardStyle}>

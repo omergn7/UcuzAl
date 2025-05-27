@@ -23,7 +23,7 @@ export default function LoginScreen({ navigation }) {
 
   const handleLogin = async () => {
     try {
-      const res = await axios.post('http://10.0.18.202:8080/api/kullanici/giris', {
+      const res = await axios.post('http://172.20.10.2:8080/api/kullanici/giris', {
         email,
         parola
       });

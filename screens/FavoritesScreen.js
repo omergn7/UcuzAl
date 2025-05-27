@@ -66,7 +66,7 @@ const ShoppingRoute = () => {
     }
 
     try {
-      const response = await fetch(`http://10.0.18.202:8080/api/urunler/search?query=${text}`);
+      const response = await fetch(`http://172.20.10.2:8080/api/urunler/search?query=${text}`);
       const data = await response.json();
       setSearchResults(data);
     } catch (error) {

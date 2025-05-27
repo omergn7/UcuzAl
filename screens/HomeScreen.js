@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 
+const { width } = Dimensions.get('window');
 const COLORS = {
   background: '#f5f6fa',
   primary: '#2ecc71',
@@ -18,89 +19,71 @@ const COLORS = {
   text: '#2d3436',
 };
 
-const marketData = [
-  {
-    id: 1,
-    name: 'Migros',
-    image: 'https://sdgmapturkey.com/wp-content/uploads/migros-logo.png',
-    backgroundColor: '#ffeaa7',
-  },
-  {
-    id: 2,
-    name: 'ŞOK',
-    image: 'https://yt3.googleusercontent.com/NgTIYRRcD-9-bUsRBVsx6SXykTtWj8A9drDFsj9Vvh2n8MG8F_2M_Ghj8pgOCKXitXzXMDEbFx8=s900-c-k-c0x00ffffff-no-rj',
-    backgroundColor: '#fab1a0',
-  },
-  {
-    id: 3,
-    name: 'A101',
-    image: 'https://upload.wikimedia.org/wikipedia/commons/f/f3/A101_logo.svg',
-    backgroundColor: '#81ecec',
-  },
-];
-
-const { width } = Dimensions.get('window');
-
 const MarketCard = ({ item }) => {
   const navigation = useNavigation();
-
   return (
     <TouchableOpacity
-      style={[styles.marketCard, { backgroundColor: item.backgroundColor }]}
-      onPress={() => navigation.navigate('MarketProducts', { marketId: item.id })}
+      style={[styles.marketCard, { backgroundColor: '#ffffff' }]}
+      onPress={() => navigation.navigate('MarketProducts', { marketId: item.marketId })}
     >
       <View style={styles.imageContainer}>
         <Image
-          source={{ uri: item.image }}
+          source={{ uri: item.marketGorsel }}
           style={styles.marketImage}
           resizeMode="contain"
         />
       </View>
       <View style={styles.marketNameContainer}>
-        <Text style={styles.marketName}>{item.name}</Text>
+        <Text style={styles.marketName}>{item.marketName}</Text>
       </View>
     </TouchableOpacity>
   );
 };
 
 export default function HomeScreen() {
-  const renderMarketGrid = () => {
-    return (
-      <View style={styles.marketGrid}>
-        {marketData.map((item) => (
-          <View key={item.id} style={styles.gridItem}>
-            <MarketCard item={item} />
-          </View>
-        ))}
-      </View>
-    );
-  };
+  const [marketData, setMarketData] = useState([]);
+
+  useEffect(() => {
+    fetch('http://172.20.10.2:8080/api/marketler')
+      .then(res => res.json())
+      .then(setMarketData)
+      .catch(err => console.error('Market verisi alinamadi', err));
+  }, []);
+
+  const renderMarketGrid = () => (
+    <View style={styles.marketGrid}>
+      {marketData.map((item) => (
+        <View key={item.marketId} style={styles.gridItem}>
+          <MarketCard item={item} />
+        </View>
+      ))}
+    </View>
+  );
 
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
-      <View style={styles.sliderContainer}>
-  <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-    <Image
-      source={{ uri: 'https://img.freepik.com/free-photo/shopping-cart-filled-with-coins-copy-space_23-2148305919.jpg' }}
-      style={styles.sliderImage}
-    />
-    <Image
-      source={{ uri: 'https://img.freepik.com/premium-photo/sale-discount-banner_88281-1663.jpg' }}
-      style={styles.sliderImage}
-    />
-    <Image
-      source={{ uri: 'https://img.freepik.com/premium-vector/shopping-concept-illustration_23-2148474173.jpg' }}
-      style={styles.sliderImage}
-    />
-  </ScrollView>
-</View>
-
+        <View style={styles.sliderContainer}>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            <Image
+              source={{ uri: 'https://img.freepik.com/free-photo/shopping-cart-filled-with-coins-copy-space_23-2148305919.jpg' }}
+              style={styles.sliderImage}
+            />
+            <Image
+              source={{ uri: 'https://img.freepik.com/premium-photo/sale-discount-banner_88281-1663.jpg' }}
+              style={styles.sliderImage}
+            />
+            <Image
+              source={{ uri: 'https://img.freepik.com/premium-vector/shopping-concept-illustration_23-2148474173.jpg' }}
+              style={styles.sliderImage}
+            />
+          </ScrollView>
+        </View>
 
         <View style={styles.welcomeContainer}>
           <Text style={styles.welcomeTitle}>Merhaba!</Text>
           <Text style={styles.welcomeText}>
-            Bugün akıllı alışveriş yaparak tasarruf etmeye hazır mısınız? En uygun fiyatlı
+            Bugün akıllı alışveriş yaparak tasarruf etmeye hazır mısınız? En uygun fiyatlı 
             ürünleri sizin için bulalım!
           </Text>
         </View>
@@ -120,15 +103,15 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.background,
   },
-  headerImageContainer: {
-    backgroundColor: COLORS.primary,
-    width: width,
-    height: 200,
+  sliderContainer: {
+    marginTop: 10,
+    height: 180,
   },
-  headerImage: {
-    width: '100%',
-    height: '100%',
-    opacity: 0.9,
+  sliderImage: {
+    width: width * 0.9,
+    height: 180,
+    borderRadius: 10,
+    marginHorizontal: 10,
   },
   welcomeContainer: {
     padding: 20,
@@ -153,9 +136,6 @@ const styles = StyleSheet.create({
     lineHeight: 24,
   },
   sectionTitleContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
     padding: 15,
   },
   sectionTitle: {
@@ -196,17 +176,6 @@ const styles = StyleSheet.create({
     height: '100%',
     resizeMode: 'contain',
   },
-  sliderContainer: {
-    marginTop: 10,
-    height: 180,
-  },
-  sliderImage: {
-    width: Dimensions.get('window').width * 0.9,
-    height: 180,
-    borderRadius: 10,
-    marginHorizontal: 10,
-  },
-  
   marketNameContainer: {
     height: 50,
     justifyContent: 'center',
