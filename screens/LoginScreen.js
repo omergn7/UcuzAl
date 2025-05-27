@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { API_BASE_URL } from '@env';
 import {
   View,
   TextInput,
@@ -23,7 +24,7 @@ export default function LoginScreen({ navigation }) {
 
   const handleLogin = async () => {
     try {
-      const res = await axios.post('http://172.20.10.2:8080/api/kullanici/giris', {
+      const res = await axios.post(`${API_BASE_URL}/api/kullanici/giris`, {
         email,
         parola
       });

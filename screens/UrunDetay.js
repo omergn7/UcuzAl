@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { API_BASE_URL } from '@env';
 import {
   View,
   Text,
@@ -27,7 +28,7 @@ export default function UrunDetay({ route }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    axios.get(`http://172.20.10.2:8080/api/urunler/detay/${barkodId}`, { timeout: 10000 })
+    axios.get(`${API_BASE_URL}/api/urunler/detay/${barkodId}`, { timeout: 10000 })
       .then(response => setUrun(response.data))
       .catch(err => console.error('Detay hatası:', err))
       .finally(() => setLoading(false));

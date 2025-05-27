@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { API_BASE_URL } from '@env';
 import {
   View,
   Text,
@@ -44,7 +45,7 @@ export default function HomeScreen() {
   const [marketData, setMarketData] = useState([]);
 
   useEffect(() => {
-    fetch('http://172.20.10.2:8080/api/marketler')
+    fetch(`${API_BASE_URL}/api/marketler`)
       .then(res => res.json())
       .then(setMarketData)
       .catch(err => console.error('Market verisi alinamadi', err));

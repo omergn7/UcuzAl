@@ -1,5 +1,6 @@
 // ProfileScreen.js
 import React, { useState, useEffect, useRef } from 'react';
+import { API_BASE_URL } from '@env';
 import {
   View,
   Text,
@@ -49,9 +50,9 @@ export default function ProfileScreen() {
       
         try {
           const [kullaniciRes, aylikRes, chartRes] = await Promise.all([
-            fetch(`http://172.20.10.2:8080/api/kullanici/${parsed.kullanici_id}`),
-            fetch(`http://172.20.10.2:8080/api/kullanici/${parsed.kullanici_id}/aylik-tasarruf`),
-            fetch(`http://172.20.10.2:8080/api/kullanici/${parsed.kullanici_id}/grafik-verisi`)
+            fetch(`${API_BASE_URL}/api/kullanici/${parsed.kullanici_id}`),
+            fetch(`${API_BASE_URL}/api/kullanici/${parsed.kullanici_id}/aylik-tasarruf`),
+            fetch(`${API_BASE_URL}/api/kullanici/${parsed.kullanici_id}/grafik-verisi`)
           ]);
       
           const kullaniciJson = await kullaniciRes.json();
@@ -264,6 +265,7 @@ export default function ProfileScreen() {
     Haftalık
   </Text>
 </TouchableOpacity>
+
 <TouchableOpacity 
   style={[styles.chartTab, selectedChart === 'monthly' && styles.selectedChartTab]}
   onPress={() => handleChartPress('monthly')}
@@ -333,7 +335,7 @@ export default function ProfileScreen() {
           <View style={styles.buttonContainer}>
             <TouchableOpacity
               style={styles.loginButton}
-              onPress={() => navigation.navigate('Login')}
+              onPress={() => navigation.navigate('LoginScreen')}
             >
               <LinearGradient
                 colors={['#000000', '#333333']}
@@ -342,6 +344,8 @@ export default function ProfileScreen() {
                 <Text style={styles.buttonText}>Giriş Yap</Text>
               </LinearGradient>
             </TouchableOpacity>
+
+          
         <TouchableOpacity
               style={styles.registerButton}
               onPress={() => navigation.navigate('Register')}

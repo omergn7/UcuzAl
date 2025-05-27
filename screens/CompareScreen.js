@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { API_BASE_URL } from '@env';
 import {
   View,
   Text,
@@ -51,7 +52,7 @@ export default function CompareScreen() {
 
     const barkod = match[0];
     try {
-      const response = await fetch(`http://172.20.10.2:8080/api/urunler/karsilastir?barkod=${barkod}`);
+      const response = await fetch(`${API_BASE_URL}/api/urunler/karsilastir?barkod=${barkod}`);
       const json = await response.json();
 
       if (json?.urunAdi) {
@@ -111,7 +112,7 @@ export default function CompareScreen() {
 
       await AsyncStorage.setItem("kullanici", JSON.stringify(parsed));
 
-      await fetch('http://172.20.10.2:8080/api/kullanici/tasarruf-ekle', {
+      await fetch(`${API_BASE_URL}/api/kullanici/tasarruf-ekle`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -171,7 +172,7 @@ export default function CompareScreen() {
       const userData = await AsyncStorage.getItem('kullanici');
       if (userData) {
         const user = JSON.parse(userData);
-        const response = await axios.post('http://172.20.10.2:8080/api/tasarruf/ekle', {
+        const response = await axios.post(`${API_BASE_URL}/api/tasarruf/ekle`, {
           kullaniciId: user.id,
           urunId: selectedProduct.id,
           tasarrufMiktari: selectedProduct.tasarruf
@@ -337,30 +338,113 @@ export default function CompareScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff' },
-  centered: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  cameraContainer: { flex: 1, position: 'relative' },
+  container: { 
+    flex: 1, 
+    backgroundColor: '#f8f9fa' 
+  },
+  centered: { 
+    flex: 1, 
+    justifyContent: 'center', 
+    alignItems: 'center',
+    backgroundColor: '#f8f9fa'
+  },
+  cameraContainer: { 
+    flex: 1, 
+    position: 'relative',
+    backgroundColor: '#000'
+  },
   closeButton: {
-    position: 'absolute', top: 40, right: 20,
-    backgroundColor: 'rgba(0,0,0,0.5)', padding: 8, borderRadius: 20
+    position: 'absolute',
+    top: 40,
+    right: 20,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    padding: 10,
+    borderRadius: 25,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
   scanButton: {
-    backgroundColor: '#000', padding: 16,
-    borderRadius: 12, flexDirection: 'row',
-    alignItems: 'center', marginTop: 20
-  },
-  scanButtonText: { color: 'white', fontSize: 18, marginLeft: 10 },
-  content: { alignItems: 'center', padding: 20 },
-  resultContainer: { marginTop: 30, width: '100%', alignItems: 'center' },
-  urunBaslik: { fontSize: 22, fontWeight: 'bold', marginBottom: 10, textAlign: 'center' },
-  urunGorsel: { width: 120, height: 120, resizeMode: 'contain', marginBottom: 10 },
-  ulkeText: { fontSize: 16, fontStyle: 'italic', color: '#555', marginBottom: 12 },
-  marketCard: {
-    backgroundColor: '#f0f0f0',
-    padding: 15,
-    borderRadius: 12,
+    backgroundColor: '#000000',
+    padding: 16,
+    borderRadius: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 20,
     width: '90%',
-    marginBottom: 10,
+    justifyContent: 'center',
+    shadowColor: '#2196f3', // daha görünür bir gölge
+    shadowOffset: {
+      width: 0,
+      height: 0,
+    },
+    shadowOpacity: 1.2,
+    shadowRadius: 10,
+    elevation: 8,
+  },
+  scanButtonText: { 
+    color: 'white', 
+    fontSize: 18, 
+    marginLeft: 10,
+    fontWeight: '600'
+  },
+  content: { 
+    alignItems: 'center', 
+    padding: 20,
+    paddingTop: 30
+  },
+  resultContainer: {
+    marginTop: 30,
+    width: '100%',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    borderRadius: 20,
+    padding: 20,
+    shadowColor: '#2196f3', // daha görünür bir gölge
+    shadowOffset: {
+      width: 0,
+      height: 0,
+    },
+    shadowOpacity: 0.7,
+    shadowRadius: 10,
+    elevation: 5,
+  },
+  urunBaslik: { 
+    fontSize: 24, 
+    fontWeight: 'bold', 
+    marginBottom: 15, 
+    textAlign: 'center',
+    color: '#2c3e50'
+  },
+  urunGorsel: { 
+    width: 150, 
+    height: 150, 
+    resizeMode: 'contain', 
+    marginBottom: 15,
+    borderRadius: 10,
+    backgroundColor: '#fff'
+  },
+  ulkeText: { 
+    fontSize: 16, 
+    fontStyle: 'italic', 
+    color: '#666', 
+    marginBottom: 15,
+    backgroundColor: '#f8f9fa',
+    paddingHorizontal: 15,
+    paddingVertical: 8,
+    borderRadius: 20
+  },
+  marketCard: {
+    backgroundColor: '#fff',
+    padding: 20,
+    borderRadius: 16,
+    width: '90%',
+    marginBottom: 15,
     position: 'relative',
     shadowColor: '#000',
     shadowOffset: {
@@ -370,14 +454,23 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 3.84,
     elevation: 5,
+    borderWidth: 1,
+    borderColor: '#eee'
   },
   enUcuzCard: {
     backgroundColor: '#e8f5e9',
     borderWidth: 2,
     borderColor: '#4caf50',
+    transform: [{ scale: 1.02 }]
   },
-  ortaPahaliCard: { backgroundColor: '#fff7cc' },
-  pahaliCard: { backgroundColor: '#ffd6d6' },
+  ortaPahaliCard: { 
+    backgroundColor: '#fff8e1',
+    borderColor: '#ffc107'
+  },
+  pahaliCard: { 
+    backgroundColor: '#ffebee',
+    borderColor: '#f44336'
+  },
   marketRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -385,14 +478,35 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
   },
   marketLogoLarge: {
-    width: 40, height: 40,
-    resizeMode: 'contain', marginRight: 12,
-    borderRadius: 6, backgroundColor: '#fff'
+    width: 50,
+    height: 50,
+    resizeMode: 'contain',
+    marginRight: 15,
+    borderRadius: 8,
+    backgroundColor: '#fff',
+    padding: 5
   },
-  marketInfo: { flex: 1, justifyContent: 'center' },
-  marketText: { fontSize: 16, fontWeight: 'bold' },
-  fiyatText: { fontSize: 16 },
-  yuzdeText: { fontSize: 14, color: '#555', marginTop: 4 },
+  marketInfo: { 
+    flex: 1, 
+    justifyContent: 'center' 
+  },
+  marketText: { 
+    fontSize: 18, 
+    fontWeight: 'bold',
+    color: '#2c3e50'
+  },
+  fiyatText: { 
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#2196f3',
+    marginTop: 4
+  },
+  yuzdeText: { 
+    fontSize: 14, 
+    color: '#666', 
+    marginTop: 4,
+    fontStyle: 'italic'
+  },
   marketHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -402,8 +516,16 @@ const styles = StyleSheet.create({
   cheapestBadge: {
     backgroundColor: '#4caf50',
     paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    shadowColor: '#4caf50',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
   cheapestText: {
     color: '#ffffff',
@@ -416,41 +538,44 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+    backgroundColor: 'rgba(0, 0, 0, 0.85)',
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 12,
-    borderRadius: 12,
+    padding: 15,
+    borderRadius: 16,
   },
   confirmationContent: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     width: '100%',
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    padding: 15,
+    borderRadius: 16,
   },
   confirmationTextContainer: {
     flex: 1,
-    marginRight: 10,
+    marginRight: 15,
   },
   confirmationText: {
     color: '#ffffff',
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: '600',
-    marginBottom: 4,
+    marginBottom: 6,
   },
   savingsText: {
     color: '#4caf50',
-    fontSize: 13,
+    fontSize: 15,
     fontWeight: '600',
   },
   confirmationButtons: {
     flexDirection: 'row',
-    gap: 8,
+    gap: 10,
   },
   confirmButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
     shadowColor: '#000',

@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { API_BASE_URL } from '@env';
 import {
   StyleSheet,
   Text,
@@ -66,7 +67,7 @@ const ShoppingRoute = () => {
     }
 
     try {
-      const response = await fetch(`http://172.20.10.2:8080/api/urunler/search?query=${text}`);
+      const response = await fetch(`${API_BASE_URL}/api/urunler/search?query=${text}`);
       const data = await response.json();
       setSearchResults(data);
     } catch (error) {
@@ -220,7 +221,7 @@ const ShoppingRoute = () => {
 };
 
 export default function FavoritesScreen() {
-  const [index, setIndex] = useState(0);
+  const [index, setIndex] = useState(1);
   const [routes] = useState([
     { key: 'favorites', title: 'Favoriler' },
     { key: 'shopping', title: 'Alışveriş Listesi' },
