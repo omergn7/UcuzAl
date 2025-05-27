@@ -11,6 +11,8 @@ import FavoritesScreen from './screens/FavoritesScreen';
 import ProfileScreen from './screens/ProfileScreen';
 import MarketProducts from './screens/MarketProducts'; // ✅ Detay ekran
 import LoginScreen from './screens/LoginScreen';
+import RegisterScreen from './screens/RegisterScreen';
+
 // Navigatorlar
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -45,18 +47,18 @@ export default function App() {
   return (
     <NavigationContainer>
       <Stack.Navigator>
-        {/* Alt menü tab'ları */}
         <Stack.Screen
           name="MainTabs"
           component={MainTabs}
           options={{ headerShown: false }}
         />
-
-        {/* Login ve Profil */}
         <Stack.Screen name="LoginScreen" component={LoginScreen} />
         <Stack.Screen name="ProfileScreen" component={ProfileScreen} />
+        <Stack.Screen
+  name="Register"
+  component={RegisterScreen}
+/>
 
-        {/* Market ürün detay ekranı */}
         <Stack.Screen
           name="MarketProducts"
           component={MarketProducts}
@@ -71,5 +73,6 @@ export default function App() {
     </NavigationContainer>
   );
 }
+
 
 

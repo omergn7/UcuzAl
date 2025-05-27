@@ -7,6 +7,7 @@ import {
   Image,
   ActivityIndicator,
   Dimensions,
+  
 } from 'react-native';
 import axios from 'axios';
 import { TouchableOpacity } from 'react-native';
@@ -28,7 +29,7 @@ export default function MarketProducts({ route }) {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get(`http://10.0.17.32:8080/api/market-urun/ozet/${marketId}`, {
+        const response = await axios.get(`http://10.0.18.202:8080/api/market-urun/ozet/${marketId}`, {
           timeout: 10000
         });
 

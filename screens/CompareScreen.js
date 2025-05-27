@@ -6,9 +6,17 @@ import {
   TouchableOpacity,
   ScrollView,
   Image,
+  Alert,
+  Animated,
+  Easing,
+  Dimensions
 } from 'react-native';
 import { CameraView, Camera } from 'expo-camera';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useFocusEffect } from '@react-navigation/native';
+import axios from 'axios';
+import { LinearGradient } from 'expo-linear-gradient';
 
 export default function CompareScreen() {
   const [hasPermission, setHasPermission] = useState(null);
@@ -16,6 +24,9 @@ export default function CompareScreen() {
   const [scanning, setScanning] = useState(false);
   const [urun, setUrun] = useState(null);
   const scannedOnceRef = useRef(false);
+  const [showConfirmation, setShowConfirmation] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const shakeAnimation = new Animated.Value(0);
 
   useEffect(() => {
     (async () => {
@@ -49,7 +60,7 @@ export default function CompareScreen() {
 
     const barkod = match[0];
     try {
-      const response = await fetch(`http://10.0.17.32:8080/api/urunler/karsilastir?barkod=${barkod}`);
+      const response = await fetch(`http://10.0.18.202:8080/api/urunler/karsilastir?barkod=${barkod}`);
       const json = await response.json();
 
       if (json?.urunAdi) {
@@ -59,7 +70,7 @@ export default function CompareScreen() {
           urunGorsel: json.urunGorsel || null,
           barkod: json.barkod,
           ulke: json.ulke || "Bilinmiyor",
-          bayrak: json.bayrak || "🏳️",
+          bayrak: json.bayrak || "\ud83c\udff3\ufe0f",
           karsilastirma: sorted,
         });
       } else {
@@ -74,6 +85,129 @@ export default function CompareScreen() {
     }
   };
 
+  const handleAldiMi = async (enUcuzIndex) => {
+    if (!urun || !urun.karsilastirma || urun.karsilastirma.length < 2) return;
+
+    const enUcuzFiyat = urun.karsilastirma[enUcuzIndex].fiyat;
+    const enPahaliFiyat = urun.karsilastirma[urun.karsilastirma.length - 1].fiyat;
+    const fark = enPahaliFiyat - enUcuzFiyat;
+
+    if (fark <= 0) return;
+
+    const onay = await new Promise((resolve) => {
+      Alert.alert(
+        "Ürünü aldınız mı?",
+        `Bu ürünü gerçekten ${enUcuzFiyat.toFixed(2)}₺'ye aldınız mı?\nTasarruf: ${fark.toFixed(2)}₺`,
+        [
+          { text: "İptal", style: "cancel", onPress: () => resolve(false) },
+          { text: "Evet", onPress: () => resolve(true) },
+        ]
+      );
+    });
+
+    if (!onay) return;
+
+    try {
+      const storedUser = await AsyncStorage.getItem("kullanici");
+      if (!storedUser) return;
+
+      const parsed = JSON.parse(storedUser);
+      const yeniToplam = (parseFloat(parsed.toplamTasarruf || 0) + fark).toFixed(2);
+      const yeniAylik = (parseFloat(parsed.aylikTasarruf || 0) + fark).toFixed(2);
+
+      parsed.toplamTasarruf = yeniToplam;
+      parsed.aylikTasarruf = yeniAylik;
+
+      await AsyncStorage.setItem("kullanici", JSON.stringify(parsed));
+
+      await fetch('http://10.0.18.202:8080/api/kullanici/tasarruf-ekle', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          kullanici_id: parsed.kullanici_id,
+          fark: fark
+        })
+      });
+
+      Alert.alert("🎉 Tebrikler!", `Tasarruf ettiniz: ${fark.toFixed(2)}₺`);
+      setUrun(null);
+    } catch (e) {
+      console.error("Tasarruf güncellenirken hata:", e);
+    }
+  };
+
+  const startShakeAnimation = () => {
+    Animated.sequence([
+      Animated.timing(shakeAnimation, {
+        toValue: 10,
+        duration: 100,
+        useNativeDriver: true,
+        easing: Easing.linear,
+      }),
+      Animated.timing(shakeAnimation, {
+        toValue: -10,
+        duration: 100,
+        useNativeDriver: true,
+        easing: Easing.linear,
+      }),
+      Animated.timing(shakeAnimation, {
+        toValue: 10,
+        duration: 100,
+        useNativeDriver: true,
+        easing: Easing.linear,
+      }),
+      Animated.timing(shakeAnimation, {
+        toValue: 0,
+        duration: 100,
+        useNativeDriver: true,
+        easing: Easing.linear,
+      }),
+    ]).start();
+  };
+
+  const handleProductPress = (product) => {
+    if (showConfirmation) {
+      setShowConfirmation(false);
+      setSelectedProduct(null);
+    } else {
+      setSelectedProduct(product);
+      setShowConfirmation(true);
+    }
+  };
+
+  const handleConfirm = async () => {
+    try {
+      const userData = await AsyncStorage.getItem('kullanici');
+      if (userData) {
+        const user = JSON.parse(userData);
+        const response = await axios.post('http://10.0.18.202:8080/api/tasarruf/ekle', {
+          kullaniciId: user.id,
+          urunId: selectedProduct.id,
+          tasarrufMiktari: selectedProduct.tasarruf
+        });
+        
+        if (response.data) {
+          // Başarılı işlem sonrası
+          setShowConfirmation(false);
+          setSelectedProduct(null);
+        }
+      }
+    } catch (error) {
+      console.error('Tasarruf eklenirken hata:', error);
+    }
+  };
+
+  const handleReject = () => {
+    setShowConfirmation(false);
+    setSelectedProduct(null);
+  };
+
+  useEffect(() => {
+    if (urun && urun.karsilastirma.length > 0) {
+      startShakeAnimation();
+    }
+  }, [urun]);
+
   const renderFiyatKarsilastirma = () => {
     if (!urun || !urun.karsilastirma || urun.karsilastirma.length === 0) return null;
 
@@ -81,27 +215,75 @@ export default function CompareScreen() {
 
     return urun.karsilastirma.map((k, index) => {
       const farkYuzde = ((k.fiyat - enUcuzFiyat) / enUcuzFiyat) * 100;
+      const isCheapest = index === 0;
 
-      let cardStyle = styles.marketCard;
-      if (index === 0) cardStyle = [styles.marketCard, styles.enUcuzCard];
-      else if (farkYuzde <= 5) cardStyle = [styles.marketCard, styles.ortaPahaliCard];
-      else cardStyle = [styles.marketCard, styles.pahaliCard];
+      let cardStyle = [styles.marketCard];
+      if (isCheapest) {
+        cardStyle = [
+          styles.marketCard,
+          styles.enUcuzCard,
+          { transform: [{ translateX: shakeAnimation }] }
+        ];
+      } else if (farkYuzde <= 5) {
+        cardStyle = [styles.marketCard, styles.ortaPahaliCard];
+      } else {
+        cardStyle = [styles.marketCard, styles.pahaliCard];
+      }
 
       const logo = getMarketLogo(k.market);
 
       return (
-        <View key={index} style={cardStyle}>
-          <View style={styles.marketRow}>
+        <Animated.View key={index} style={cardStyle}>
+          <TouchableOpacity
+            style={styles.marketRow}
+            onPress={() => isCheapest && handleProductPress(k)}
+          >
             {logo && <Image source={{ uri: logo }} style={styles.marketLogoLarge} />}
             <View style={styles.marketInfo}>
-              <Text style={styles.marketText}>{k.market}</Text>
+              <View style={styles.marketHeader}>
+                <Text style={styles.marketText}>{k.market}</Text>
+                {isCheapest && (
+                  <View style={styles.cheapestBadge}>
+                    <Text style={styles.cheapestText}>En Ucuz</Text>
+                  </View>
+                )}
+              </View>
               <Text style={styles.fiyatText}>{k.fiyat.toFixed(2)} ₺</Text>
-              {index > 0 && (
+              {!isCheapest && (
                 <Text style={styles.yuzdeText}>%{farkYuzde.toFixed(1)} daha pahalı</Text>
               )}
             </View>
-          </View>
-        </View>
+          </TouchableOpacity>
+
+          {showConfirmation && isCheapest && (
+            <View style={styles.confirmationOverlay}>
+              <View style={styles.confirmationContent}>
+                <View style={styles.confirmationTextContainer}>
+                  <Text style={styles.confirmationText}>
+                    Bu ürünü {k.fiyat.toFixed(2)}₺'ye aldınız mı?
+                  </Text>
+                  <Text style={styles.savingsText}>
+                    Tasarruf: {(urun.karsilastirma[urun.karsilastirma.length - 1].fiyat - k.fiyat).toFixed(2)}₺
+                  </Text>
+                </View>
+                <View style={styles.confirmationButtons}>
+                  <TouchableOpacity 
+                    style={[styles.confirmButton, styles.acceptButton]} 
+                    onPress={() => handleAldiMi(index)}
+                  >
+                    <Ionicons name="checkmark" size={20} color="#fff" />
+                  </TouchableOpacity>
+                  <TouchableOpacity 
+                    style={[styles.confirmButton, styles.rejectButton]} 
+                    onPress={handleReject}
+                  >
+                    <Ionicons name="close" size={20} color="#fff" />
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </View>
+          )}
+        </Animated.View>
       );
     });
   };
@@ -180,18 +362,28 @@ const styles = StyleSheet.create({
   resultContainer: { marginTop: 30, width: '100%', alignItems: 'center' },
   urunBaslik: { fontSize: 22, fontWeight: 'bold', marginBottom: 10, textAlign: 'center' },
   urunGorsel: { width: 120, height: 120, resizeMode: 'contain', marginBottom: 10 },
-  ulkeText: {
-    fontSize: 16,
-    fontStyle: 'italic',
-    color: '#555',
-    marginBottom: 12,
-  },
+  ulkeText: { fontSize: 16, fontStyle: 'italic', color: '#555', marginBottom: 12 },
   marketCard: {
-    backgroundColor: '#f0f0f0', padding: 15,
-    borderRadius: 10, width: '90%', marginBottom: 10,
-    alignItems: 'center'
+    backgroundColor: '#f0f0f0',
+    padding: 15,
+    borderRadius: 12,
+    width: '90%',
+    marginBottom: 10,
+    position: 'relative',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
-  enUcuzCard: { backgroundColor: '#d1f7c4' },
+  enUcuzCard: {
+    backgroundColor: '#e8f5e9',
+    borderWidth: 2,
+    borderColor: '#4caf50',
+  },
   ortaPahaliCard: { backgroundColor: '#fff7cc' },
   pahaliCard: { backgroundColor: '#ffd6d6' },
   marketRow: {
@@ -201,18 +393,87 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
   },
   marketLogoLarge: {
-    width: 40,
-    height: 40,
-    resizeMode: 'contain',
-    marginRight: 12,
-    borderRadius: 6,
-    backgroundColor: '#fff',
+    width: 40, height: 40,
+    resizeMode: 'contain', marginRight: 12,
+    borderRadius: 6, backgroundColor: '#fff'
   },
-  marketInfo: {
-    flex: 1,
-    justifyContent: 'center',
-  },
+  marketInfo: { flex: 1, justifyContent: 'center' },
   marketText: { fontSize: 16, fontWeight: 'bold' },
   fiyatText: { fontSize: 16 },
   yuzdeText: { fontSize: 14, color: '#555', marginTop: 4 },
+  marketHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  cheapestBadge: {
+    backgroundColor: '#4caf50',
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  cheapestText: {
+    color: '#ffffff',
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  confirmationOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 12,
+    borderRadius: 12,
+  },
+  confirmationContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    width: '100%',
+  },
+  confirmationTextContainer: {
+    flex: 1,
+    marginRight: 10,
+  },
+  confirmationText: {
+    color: '#ffffff',
+    fontSize: 14,
+    fontWeight: '600',
+    marginBottom: 4,
+  },
+  savingsText: {
+    color: '#4caf50',
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  confirmationButtons: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  confirmButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  acceptButton: {
+    backgroundColor: '#4caf50',
+  },
+  rejectButton: {
+    backgroundColor: '#f44336',
+  },
 });
