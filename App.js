@@ -13,6 +13,7 @@ import LoginScreen from './screens/LoginScreen';
 import RegisterScreen from './screens/RegisterScreen';
 import MarketProducts from './screens/MarketProducts';
 import UrunDetay from './screens/UrunDetay';
+import HastalikSecimScreen from './screens/HastalikSecimScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -56,6 +57,7 @@ export default function App() {
         {/* Ürün detay ve market ürünleri */}
         <Stack.Screen name="MarketProducts" component={MarketProducts} options={{ headerShown: true, title: 'Market Ürünleri' }} />
         <Stack.Screen name="UrunDetay" component={UrunDetay} options={{ headerShown: true, title: 'Ürün Detayı' }} />
+        <Stack.Screen name="HastalikSecim" component={HastalikSecimScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

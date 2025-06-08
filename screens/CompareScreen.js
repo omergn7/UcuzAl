@@ -38,13 +38,16 @@ export default function CompareScreen() {
 
 
   const handleBarCodeScanned = async ({ type, data }) => {
+    console.log("📷 Barkod tarandı:", data);
+
     if (scannedOnceRef.current) return;
 
     scannedOnceRef.current = true;
     setScanned(true);
     setScanning(false);
 
-    const match = data.match(/\b\d{8}\b/);
+    const match = data.match(/\d{8,14}/);
+
     if (!match) {
       scannedOnceRef.current = false;
       return;
@@ -54,6 +57,8 @@ export default function CompareScreen() {
     try {
       const response = await fetch(`${API_BASE_URL}/api/urunler/karsilastir?barkod=${barkod}`);
       const json = await response.json();
+
+      console.log("🎯 Backend cevabı:", json);
 
       if (json?.urunAdi) {
         const sorted = [...json.karsilastirma].sort((a, b) => a.fiyat - b.fiyat);

@@ -428,18 +428,19 @@ export default function ProfileScreen() {
             </View>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate('Scanner')}>
+          <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate('HastalikSecim')}>
             <View style={styles.menuItemContent}>
-              <View style={styles.menuIconContainer}>
-                <Text style={styles.menuIcon}>📷</Text>
-              </View>
-              <View style={styles.menuTextContainer}>
-                <Text style={styles.menuTitle}>Barkod Tarayıcı</Text>
-                <Text style={styles.menuSubtitle}>Ürün fiyatlarını karşılaştırın</Text>
-              </View>
-              <Ionicons name="chevron-forward" size={24} color="#666" />
-            </View>
-          </TouchableOpacity>
+            <View style={styles.menuIconContainer}>
+            <Text style={styles.menuIcon}>🩺</Text>
+          </View>
+          <View style={styles.menuTextContainer}>
+          <Text style={styles.menuTitle}>Hastalıklarım</Text>
+           <Text style={styles.menuSubtitle}>AI yorumları için sağlık bilgilerini belirle</Text>
+             </View>
+           <Ionicons name="chevron-forward" size={24} color="#666" />
+             </View>
+        </TouchableOpacity>
+
 
           <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate('Settings')}>
             <View style={styles.menuItemContent}>
