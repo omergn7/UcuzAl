@@ -14,11 +14,11 @@ import RegisterScreen from './screens/RegisterScreen';
 import MarketProducts from './screens/MarketProducts';
 import UrunDetay from './screens/UrunDetay';
 import HastalikSecimScreen from './screens/HastalikSecimScreen';
+import ChatbotScreen from './screens/ChatbotScreen'; // ✅ Chatbot ekranını ekle
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 
-// Alt sekmeler (giriş gerekmeyenler dahil)
 function MainTabs() {
   return (
     <Tab.Navigator
@@ -29,6 +29,7 @@ function MainTabs() {
           else if (route.name === 'Karşılaştır') iconName = focused ? 'list' : 'list-outline';
           else if (route.name === 'Favoriler') iconName = focused ? 'heart' : 'heart-outline';
           else if (route.name === 'Profil') iconName = focused ? 'person' : 'person-outline';
+          else if (route.name === 'Chatbot') iconName = focused ? 'chatbubbles' : 'chatbubbles-outline';
           return <Ionicons name={iconName} size={size} color={color} />;
         },
         tabBarActiveTintColor: '#007AFF',
@@ -38,6 +39,7 @@ function MainTabs() {
       <Tab.Screen name="Ana Sayfa" component={HomeScreen} />
       <Tab.Screen name="Karşılaştır" component={CompareScreen} />
       <Tab.Screen name="Favoriler" component={FavoritesScreen} />
+      <Tab.Screen name="Chatbot" component={ChatbotScreen} /> 
       <Tab.Screen name="Profil" component={ProfileScreen} />
     </Tab.Navigator>
   );
@@ -47,14 +49,9 @@ export default function App() {
   return (
     <NavigationContainer>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
-        {/* Ana sekmeler */}
         <Stack.Screen name="MainTabs" component={MainTabs} />
-
-        {/* Profil yönlendirmeler */}
         <Stack.Screen name="LoginScreen" component={LoginScreen} />
         <Stack.Screen name="Register" component={RegisterScreen} />
-
-        {/* Ürün detay ve market ürünleri */}
         <Stack.Screen name="MarketProducts" component={MarketProducts} options={{ headerShown: true, title: 'Market Ürünleri' }} />
         <Stack.Screen name="UrunDetay" component={UrunDetay} options={{ headerShown: true, title: 'Ürün Detayı' }} />
         <Stack.Screen name="HastalikSecim" component={HastalikSecimScreen} />

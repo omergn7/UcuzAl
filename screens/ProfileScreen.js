@@ -295,7 +295,7 @@ export default function ProfileScreen() {
           segments={5}
           renderDotContent={({ x, y, index, indexData }) => (
             <View key={index} style={[styles.dotLabel, { left: x - 20, top: y - 30 }]}>
-              <Text style={styles.dotLabelText}>₺{indexData}</Text>
+              <Text style={styles.dotLabelText}>₺{Number(indexData).toFixed(2)}</Text>
             </View>
           )}
           
